@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "settings": {
+    "siteTitle": "MyLittleUniverse",
+    "titleSuffix": "",
+    "headerPadding": "125px"
+  },
+  "pages": [
+    {
+      "id": "home",
+      "name": "Home",
+      "slug": "home",
+      "title": "MyLittleUniverse",
+      "heading": "Welcome to MyLittleUniverse",
+      "body": "<p>A little universe for big ideas, school projects, creativity and learning.</p><section><h2>Explore</h2><p>Add your projects, experiments, artwork, certificates and learning notes using the CMS.</p></section>",
+      "parentId": null
+    }
+  ]
+}
