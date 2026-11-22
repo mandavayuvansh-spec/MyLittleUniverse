@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MyLittleUniverse CMS — Smart Publisher</title>
+<style>
+:root{--bg:#f4f6f8;--panel:#fff;--ink:#111;--muted:#667085;--line:#d0d5dd;--accent:#3047c9;--danger:#b42318;--ok:#067647}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,-apple-system,Segoe UI,Arial,sans-serif}
+header{position:sticky;top:0;z-index:20;background:#111;color:#fff;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px}header h1{font-size:18px;margin:0}.actions{display:flex;gap:8px;flex-wrap:wrap}
+button{border:2px solid #111;background:#fff;color:#111;border-radius:7px;padding:9px 12px;font-weight:800;cursor:pointer}button.primary{background:#111;color:#fff}button.danger{border-color:var(--danger);color:var(--danger)}button:disabled{opacity:.45;cursor:not-allowed}
+.wrap{max-width:1500px;margin:20px auto;padding:0 16px}.layout{display:grid;grid-template-columns:300px minmax(0,1fr);gap:18px}.panel{background:#fff;border:2px solid #111;border-radius:10px;padding:16px;box-shadow:0 2px 0 #ddd}h2{font-size:16px;margin:0 0 12px}h3{font-size:14px;margin:16px 0 8px}
+label{display:block;font-size:12px;font-weight:800;margin:10px 0 5px}input,textarea,select{width:100%;border:1px solid #98a2b3;border-radius:7px;padding:9px;font:inherit;background:#fff}textarea{min-height:150px;resize:vertical}.mono{font-family:"Courier New",monospace;font-size:13px}
+.status{padding:10px;border-radius:7px;background:#eef2f6;font-size:12px;white-space:pre-wrap;margin-top:10px}.status.ok{background:#ecfdf3;color:var(--ok)}.status.err{background:#fef3f2;color:var(--danger)}
+.tree{margin-top:8px}.tree ul{list-style:none;margin:0;padding-left:18px}.tree>ul{padding-left:0}.node{margin:4px 0}.node-row{display:flex;align-items:center;gap:5px;border:1px solid #d0d5dd;border-radius:7px;padding:6px;background:#fff}.node-row.selected{border:2px solid var(--accent);background:#eef2ff}.node-label{flex:1;min-width:0;cursor:pointer}.node-label strong{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.node-label small{display:block;color:var(--muted);font-size:10px}.tiny{padding:4px 7px;font-size:11px;border-width:1px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}.tabs{display:flex;gap:6px;border-bottom:1px solid var(--line);padding-bottom:8px;margin-bottom:14px;flex-wrap:wrap}.tab{padding:7px 10px;border:1px solid #aaa;border-radius:6px;cursor:pointer;font-size:12px}.tab.active{background:#111;color:#fff}.editor{display:none}.editor.active{display:block}.help{color:var(--muted);font-size:12px;line-height:1.45}.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.page-list-actions{margin-top:10px}.preview{width:100%;height:680px;border:2px solid #111;border-radius:8px;background:#fff}.badge{display:inline-block;padding:3px 7px;border-radius:999px;background:#eef2ff;font-size:10px;font-weight:800}.danger-text{color:var(--danger)}
+@media(max-width:1000px){.layout{grid-template-columns:1fr}.grid2{grid-template-columns:1fr}.preview{height:520px}}
+</style>
+</head>
+<body>
+<header><h1>MyLittleUniverse CMS — Smart Publisher</h1><div class="actions"><button id="newPageBtn">+ New page</button><button id="previewBtn">Preview</button><button id="publishBtn" class="primary">Publish to GitHub</button></div></header>
+<div class="wrap"><div class="layout">
+<section class="panel">
+<h2>1. GitHub repository</h2>
+<label>Owner / organization</label><input id="owner" placeholder="rbutech">
+<label>Repository</label><input id="repo" placeholder="my-site">
+<label>Branch</label><input id="branch" value="main">
+<label>Fine-grained token</label><input id="token" type="password" placeholder="github_pat_...">
+<p class="help">Use a fine-grained token with Contents: Read and write plus Metadata: Read. Token is kept only in this page memory; do not save this admin page with a token inside it.</p>
+<div class="row"><button id="loadBtn" class="primary">Load site</button><button id="sampleBtn">Load sample</button></div><p class="help">First publish creates <code>index.html</code>, <code>cms.json</code> and your <code>pages/</code> files. No starter structure is required. Keep this admin.html file on your computer; later publishes commit only changed website files and preserve unrelated repository files.</p><div id="status" class="status">Ready.</div>
+<hr style="border:0;border-top:1px solid #ddd;margin:16px 0">
+<h2>2. Site settings</h2>
+<label>Site title</label><input id="siteTitle" value="same as all ways">
+<label>Browser title suffix</label><input id="titleSuffix" value="">
+<label>Header padding</label><input id="headerPadding" value="125px">
+<h3>Page tree</h3><p class="help">Top-level pages become <b>Main Links</b>. Child pages appear under their parent as <b>sublinks</b>. You can create children under any page.</p>
+<div class="row"><button id="addRootBtn">+ Main link/page</button><button id="addChildBtn">+ Sublink/page</button></div>
+<div id="tree" class="tree"></div>
+</section>
+
+<section class="panel">
+<div class="tabs"><div class="tab active" data-tab="page">Page editor</div><div class="tab" data-tab="navigation">Navigation</div><div class="tab" data-tab="source">HTML source</div><div class="tab" data-tab="preview">Preview</div></div>
+<div id="page" class="editor active">
+<div id="noPage" class="help">Create or select a page from the tree.</div>
+<div id="pageForm" style="display:none">
+<div class="grid2"><div><label>Page name / navigation text</label><input id="pageName"></div><div><label>URL slug</label><input id="pageSlug" placeholder="about-us"></div></div>
+<div class="grid2"><div><label>Parent page</label><select id="pageParent"></select></div><div><label>Browser title</label><input id="pageTitle"></div></div>
+<label>Page heading</label><input id="pageHeading">
+<label>Page content HTML (paste your HTML here)</label><textarea id="pageBody" class="mono" style="min-height:360px" placeholder="<section><h2>My project</h2><p>Paste page content...</p></section>"></textarea>
+<p class="help">HTML is intentionally supported because this is a static CMS. You can paste headings, paragraphs, tables, images, links, cards, etc.</p>
+<div class="row"><button id="savePageBtn" class="primary">Save page changes</button><button id="deletePageBtn" class="danger">Delete page</button></div>
+</div></div>
+<div id="navigation" class="editor"><h2>Navigation behavior</h2><p class="help">The navigation is generated automatically from the page tree. Main links are all top-level pages. On a page with children, its children are shown in the left sidebar. A page can itself have children, so the same structure works for deeper levels.</p><div id="navSummary"></div></div>
+<div id="source" class="editor"><h2>Generated HTML</h2><p class="help">This is the generated HTML for the selected page. Editing this field does not automatically change the structured data until you click <b>Apply source</b>.</p><div class="row"><button id="applySourceBtn">Apply source to current page</button></div><textarea id="sourceHtml" class="mono" style="min-height:600px"></textarea></div>
+<div id="preview" class="editor"><h2>Preview</h2><iframe id="previewFrame" class="preview" sandbox="allow-same-origin allow-popups"></iframe></div>
+</section></div></div>
+<script>
+const $=id=>document.getElementById(id);
+let site={version:1,settings:{siteTitle:'same as all ways',titleSuffix:'',headerPadding:'125px'},pages:[]};
+let selectedId=null, loaded=false, dirty=false;
+const uid=()=> 'p_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,8);
+function slugify(s){return String(s||'page').toLowerCase().trim().replace(/[^a-z0-9\s_-]/g,'').replace(/[\s_-]+/g,'-').replace(/^-+|-+$/g,'')||'page'}
+function esc(s){return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
+function pagePath(p){return p.slug==='home'?'index.html':`pages/${p.slug}.html`}
+function descendants(id){let out=[];function walk(pid){site.pages.filter(x=>x.parentId===pid).forEach(x=>{out.push(x);walk(x.id)})}walk(id);return out}
+function roots(){return site.pages.filter(p=>!p.parentId)}
+function children(id){return site.pages.filter(p=>p.parentId===id)}
+function uniqueSlug(base,id){let s=slugify(base);let n=1;while(site.pages.some(p=>p.id!==id&&p.slug===s)){n++;s=slugify(base)+'-'+n}return s}
+function renderTree(){
+ const root=roots(); const ul=document.createElement('ul');
+ function branch(parent, container){site.pages.filter(p=>p.parentId===parent).forEach(p=>{const li=document.createElement('li');li.className='node';const row=document.createElement('div');row.className='node-row'+(p.id===selectedId?' selected':'');
+ row.innerHTML=`<button class="tiny" data-up="${p.id}" title="Move up">↑</button><button class="tiny" data-down="${p.id}" title="Move down">↓</button><div class="node-label" data-select="${p.id}"><strong>${esc(p.name)}</strong><small>${esc(pagePath(p))}</small></div><button class="tiny" data-child="${p.id}" title="Add child">+</button>`;
+ li.appendChild(row);const kids=site.pages.filter(x=>x.parentId===p.id);if(kids.length){const sub=document.createElement('ul');branch(p.id,sub);li.appendChild(sub)}container.appendChild(li)})}
+ branch(null,ul); $('tree').innerHTML='';$('tree').appendChild(ul);
+ document.querySelectorAll('[data-select]').forEach(e=>e.onclick=()=>selectPage(e.dataset.select));
+ document.querySelectorAll('[data-child]').forEach(e=>e.onclick=()=>newPage(e.dataset.child));
+ document.querySelectorAll('[data-up]').forEach(e=>e.onclick=()=>movePage(e.dataset.up,-1));
+ document.querySelectorAll('[data-down]').forEach(e=>e.onclick=()=>movePage(e.dataset.down,1));
+ updateNavSummary();
+}
+function selectPage(id){selectedId=id;renderTree();const p=site.pages.find(x=>x.id===id);if(!p)return;$('noPage').style.display='none';$('pageForm').style.display='block';$('pageName').value=p.name;$('pageSlug').value=p.slug;$('pageSlug').disabled=p.id==='home';$('pageTitle').value=p.title;$('pageHeading').value=p.heading;$('pageBody').value=p.body;$('pageParent').innerHTML='<option value="">(Main link / top level)</option>'+site.pages.filter(x=>x.id!==id&&!descendants(id).some(d=>d.id===x.id)).map(x=>`<option value="${x.id}">${esc(x.name)}</option>`).join('');$('pageParent').value=p.parentId||'';updateSource();dirty=false}
+function savePage(){const p=site.pages.find(x=>x.id===selectedId);if(!p)return;const oldSlug=p.slug;p.name=$('pageName').value.trim()||'Untitled';p.slug=p.id==='home'?'home':uniqueSlug($('pageSlug').value.trim()||p.name,p.id);p.title=$('pageTitle').value.trim()||p.name;p.heading=$('pageHeading').value.trim()||p.name;p.body=$('pageBody').value;p.parentId=$('pageParent').value||null;renderTree();selectPage(p.id);dirty=true;setStatus(`Saved locally: ${p.name}\n${oldSlug!==p.slug?'Slug changed to '+p.slug+' — publish will remove the old file.':''}`,'ok')}
+function newPage(parentId=null){const name=parentId?'New sublink':'New main link';const p={id:uid(),name,slug:uniqueSlug(name,''),title:name,heading:name,body:'<p>Start writing your page here.</p>',parentId:parentId||null};site.pages.push(p);selectPage(p.id);renderTree();dirty=true}
+function deletePage(){const p=site.pages.find(x=>x.id===selectedId);if(!p)return;if(p.id==='home'){setStatus('The Home page cannot be deleted. Keep it as index.html.','err');return}if(!confirm(`Delete “${p.name}” and all child pages?`))return;const ids=new Set([p.id,...descendants(p.id).map(x=>x.id)]);site.pages=site.pages.filter(x=>!ids.has(x.id));selectedId=null;renderTree();$('pageForm').style.display='none';$('noPage').style.display='block';dirty=true;setStatus('Page tree changed locally. Publish to delete the files from GitHub.','ok')}
+function movePage(id,dir){const p=site.pages.find(x=>x.id===id);const siblings=site.pages.filter(x=>(x.parentId||null)===(p.parentId||null));const i=siblings.findIndex(x=>x.id===id);const j=i+dir;if(j<0||j>=siblings.length)return;const a=siblings[i],b=siblings[j];const ia=site.pages.indexOf(a),ib=site.pages.indexOf(b);[site.pages[ia],site.pages[ib]]=[site.pages[ib],site.pages[ia]];renderTree();dirty=true}
+function navFor(parentId){return site.pages.filter(x=>(x.parentId||null)===(parentId||null))}
+function relativeTo(fromPage,target){if(fromPage.slug==='home') return target.slug==='home'?'index.html':`pages/${target.slug}.html`; if(target.slug==='home') return '../index.html'; return `./${target.slug}.html`}
+function generatePage(p){
+ const top=roots();
+ const kids=children(p.id);
+ const bodyClass=kids.length?'':' no-sidebar';
+ const title=esc(p.title+(site.settings.titleSuffix||''));
+ const nav=top.map((x,i)=>`<a href="${esc(relativeTo(p,x))}">${esc(x.name)}</a>`).join('');
+ const side=kids.map(x=>`<a href="${esc(relativeTo(p,x))}">${esc(x.name)}</a>`).join('');
+ const homeHref=p.slug==='home'?'index.html':'../index.html';
+ return `<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#101828"><title>${title}</title>
+<style>
+:root{--primary:#5145e5;--primary-dark:#3930b8;--ink:#172033;--muted:#667085;--border:#e6e8ef;--surface:#fff;--background:#f7f8fc;--max:1240px;--radius:18px;--shadow:0 12px 36px rgba(16,24,40,.06)}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:100px}body{margin:0;background:var(--background);color:var(--ink);font:16px/1.7 Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}a{color:inherit}a:focus-visible,button:focus-visible{outline:3px solid #a5a0ff;outline-offset:4px}.site{width:100%;min-height:100vh;overflow:clip}
+.site-header{position:sticky;top:0;z-index:100;background:rgba(255,255,255,.94);border-bottom:1px solid var(--border);backdrop-filter:blur(16px)}.header-inner{max-width:var(--max);min-height:80px;margin:0 auto;padding:12px 28px;display:flex;align-items:center;justify-content:space-between;gap:22px}.brand{display:inline-flex;align-items:center;gap:12px;text-decoration:none;min-width:0}.brand-mark{width:44px;height:44px;display:grid;place-items:center;flex-shrink:0;border-radius:14px;background:linear-gradient(135deg,#6558f5,#4035bd);color:#fff;font-size:22px;font-weight:800;box-shadow:0 6px 16px rgba(81,69,229,.24)}.site-title{display:block;color:var(--ink);font-size:19px;font-weight:750;line-height:1.3;letter-spacing:-.5px;overflow-wrap:anywhere}.brand-caption{display:block;margin-top:3px;color:var(--muted);font-size:10px;font-weight:600;letter-spacing:.7px;text-transform:uppercase}.header-actions{display:flex;align-items:center;gap:14px}.main-nav{display:flex;align-items:center;gap:5px;min-width:0}.main-nav a{display:inline-flex;align-items:center;padding:9px 12px;border-radius:10px;color:#475467;font-size:14px;font-weight:600;text-decoration:none;white-space:nowrap;transition:background .2s,color .2s}.main-nav a:hover,.main-nav a[aria-current=page]{background:#f0efff;color:var(--primary)}.main-nav .sep{display:none}.contact-button{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:43px;padding:10px 17px;border-radius:11px;background:var(--primary);color:#fff;font-size:13px;font-weight:700;text-decoration:none;white-space:nowrap;transition:background .2s,transform .2s}.contact-button:hover{background:var(--primary-dark);transform:translateY(-1px)}.menu-toggle{display:none;width:43px;height:43px;border:1px solid var(--border);border-radius:11px;background:#fff;color:var(--ink);font-size:22px;cursor:pointer}
+.body{display:grid;grid-template-columns:230px minmax(0,1fr);width:100%;max-width:var(--max);margin:0 auto;padding:36px 28px 60px;gap:28px;align-items:start}.body.no-sidebar{grid-template-columns:minmax(0,1fr)}.sidebar{position:sticky;top:108px;min-width:0;padding:21px 16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow)}.sidebar:empty{display:none}.sidebar:not(:empty)::before{content:"ON THIS PAGE";display:block;margin:0 10px 13px;color:#98a2b3;font-size:10px;font-weight:800;letter-spacing:1.3px}.sidebar a{display:flex;align-items:center;margin:4px 0;padding:10px 11px;border-radius:10px;color:#475467;font-size:13px;font-weight:600;line-height:1.5;text-decoration:none;overflow-wrap:anywhere;transition:background .2s,color .2s}.sidebar a:hover,.sidebar a[aria-current=page]{background:#f0efff;color:var(--primary)}.content{display:block;width:100%;min-width:0;padding:clamp(32px,5vw,64px);border:1px solid #e8e5ff;border-radius:24px;background:radial-gradient(ellipse at 100% 0%,rgba(170,158,255,.20),transparent 42%),linear-gradient(135deg,#fff 0%,#f7f6ff 100%);box-shadow:var(--shadow);font-size:17px;line-height:1.8;overflow-wrap:anywhere}.content h1{margin:0 0 22px;color:#141b34;font-size:clamp(32px,4.5vw,52px);font-weight:780;line-height:1.15;letter-spacing:-1.8px}.content h2{margin:34px 0 14px;color:var(--ink);font-size:clamp(23px,3vw,30px);line-height:1.3;letter-spacing:-.7px}.content h3{margin:26px 0 10px;font-size:20px;line-height:1.4}.content p,.content li{color:#475467;font-size:17px;line-height:1.85}.content a{color:var(--primary);text-underline-offset:3px}.content img{max-width:100%;height:auto;border-radius:12px}.content table{width:100%;border-collapse:collapse;overflow-wrap:anywhere;background:#fff}.content th,.content td{padding:12px;border:1px solid var(--border);text-align:left}.content th{background:#f8f8fc}.content blockquote{margin:20px 0;padding:8px 18px;border-left:4px solid var(--primary);background:#f5f4ff;color:#475467}.content pre{max-width:100%;overflow:auto;padding:16px;border-radius:12px;background:#101828;color:#f8fafc}.content code{overflow-wrap:anywhere}.site-footer{border-top:1px solid var(--border);background:#fff}.footer-inner{max-width:var(--max);margin:0 auto;padding:24px 28px;display:flex;align-items:center;justify-content:space-between;gap:18px}.footer-brand{color:var(--ink);font-size:13px;font-weight:750}.footer-copy{margin-top:3px;color:var(--muted);font-size:12px}.footer-links{display:flex;flex-wrap:wrap;gap:18px}.footer-links a{color:#667085;font-size:12px;text-decoration:none}.footer-links a:hover{color:var(--primary)}
+@media(max-width:980px){.header-inner{padding:12px 20px}.header-actions{gap:8px}.main-nav a{padding:8px 9px;font-size:13px}.body{grid-template-columns:190px minmax(0,1fr);gap:18px;padding:22px 20px 40px}.content{padding:32px}}
+@media(max-width:720px){.header-inner{min-height:70px;padding:11px 16px;gap:10px}.brand-mark{width:39px;height:39px;font-size:19px}.site-title{font-size:16px}.brand-caption{font-size:9px}.header-actions{gap:8px}.contact-button{display:none}.menu-toggle{display:grid;place-items:center;flex-shrink:0}.main-nav{display:none;position:absolute;top:100%;left:0;right:0;padding:12px 16px 17px;flex-direction:column;align-items:stretch;gap:4px;border-bottom:1px solid var(--border);background:#fff;box-shadow:0 14px 20px rgba(16,24,40,.06)}.main-nav.is-open{display:flex}.main-nav a{padding:11px 13px;font-size:14px}.body{display:flex;flex-direction:column;gap:16px;padding:16px 14px 30px}.sidebar{position:static;width:100%;padding:12px}.sidebar:not(:empty)::before{margin:0 8px 6px}.sidebar a{display:inline-flex;margin:3px;padding:8px 9px;font-size:12px}.content{width:100%;padding:28px 21px;border-radius:18px}.content h1{font-size:clamp(31px,8vw,42px);letter-spacing:-1.3px}.content p,.content li{font-size:16px}.content table{display:block;overflow-x:auto}.footer-inner{padding:22px 16px;align-items:flex-start;flex-direction:column}.footer-links{gap:15px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important}}
+</style></head><body><div class="site">
+<header class="site-header"><div class="header-inner"><a class="brand" href="${esc(homeHref)}" aria-label="Home"><span class="brand-mark" aria-hidden="true">${esc((site.settings.siteTitle||'S').trim().charAt(0).toUpperCase()||'S')}</span><span><span class="site-title">${esc(site.settings.siteTitle)}</span><span class="brand-caption">Ideas. Solutions. Growth.</span></span></a><div class="header-actions"><nav class="main-nav" id="mainNav" aria-label="Main navigation">${nav}</nav><a class="contact-button" href="${esc(relativeTo(p,top.find(x=>/contact/i.test(x.name))||p))}">Let's Talk ↗</a><button class="menu-toggle" id="menuToggle" type="button" aria-label="Open navigation menu" aria-controls="mainNav" aria-expanded="false"><span id="menuIcon" aria-hidden="true">☰</span></button></div></div></header>
+<div class="body${bodyClass}"><aside class="sidebar" aria-label="Child pages">${side}</aside><main class="content"><h1>${esc(p.heading)}</h1>${p.body}</main></div>
+<footer class="site-footer"><div class="footer-inner"><div><div class="footer-brand">${esc(site.settings.siteTitle)}</div><div class="footer-copy">© <span id="currentYear"></span> All rights reserved.</div></div><nav class="footer-links" aria-label="Footer navigation">${top.map(x=>`<a href="${esc(relativeTo(p,x))}">${esc(x.name)}</a>`).join('')}</nav></div></footer>
+</div><script>(function(){const toggle=document.getElementById('menuToggle');const nav=document.getElementById('mainNav');const icon=document.getElementById('menuIcon');function setOpen(open){nav.classList.toggle('is-open',open);toggle.setAttribute('aria-expanded',String(open));toggle.setAttribute('aria-label',open?'Close navigation menu':'Open navigation menu');icon.textContent=open?'×':'☰'}toggle.addEventListener('click',()=>setOpen(toggle.getAttribute('aria-expanded')!=='true'));nav.addEventListener('click',e=>{if(e.target.closest('a'))setOpen(false)});document.addEventListener('keydown',e=>{if(e.key==='Escape'){setOpen(false)}});window.addEventListener('resize',()=>{if(window.innerWidth>720)setOpen(false)});const path=location.pathname.replace(/\\/+$/,'');nav.querySelectorAll('a').forEach(a=>{try{if(new URL(a.href,location.href).pathname.replace(/\\/+$/,'')===path)a.setAttribute('aria-current','page')}catch(e){}});document.getElementById('currentYear').textContent=new Date().getFullYear()})();<\/script>
+</body></html>`
+}
+function updateSource(){const p=site.pages.find(x=>x.id===selectedId);if(p)$('sourceHtml').value=generatePage(p)}
+function preview(){updateSource();$('previewFrame').src=URL.createObjectURL(new Blob([$('sourceHtml').value],{type:'text/html'}));document.querySelector('[data-tab="preview"]').click()}
+function updateNavSummary(){const lines=[];function walk(parent,depth){site.pages.filter(x=>(x.parentId||null)===(parent||null)).forEach(x=>{lines.push(`${'  '.repeat(depth)}${depth?'↳ ':'• '}${x.name} → ${pagePath(x)}`);walk(x.id,depth+1)})}walk(null,0);$('navSummary').innerHTML='<pre class="mono">'+esc(lines.join('\n'))+'</pre>'}
+function setStatus(m,t=''){ $('status').textContent=m;$('status').className='status '+t }
+const starter={version:1,settings:{siteTitle:'MyLittleUniverse',titleSuffix:'',headerPadding:'125px'},pages:[
+{id:'home',name:'Home',slug:'home',title:'MyLittleUniverse',heading:'Welcome to MyLittleUniverse',body:'<p>A little universe for big ideas, school projects, creativity and learning.</p><section><h2>Explore</h2><p>Add your projects, experiments, artwork, certificates and learning notes using the CMS.</p></section>',parentId:null}
+]};
+const sample={version:1,settings:{siteTitle:'MyLittleUniverse',titleSuffix:'',headerPadding:'125px'},pages:[
+{id:'home',name:'Home',slug:'home',title:'MyLittleUniverse',heading:'Welcome to MyLittleUniverse',body:'<p>A little universe for big ideas, school projects, creativity and learning.</p>',parentId:null},
+{id:'projects',name:'My Projects',slug:'my-projects',title:'My Projects',heading:'My Projects',body:'<p>Showcase coding, science and creative projects here.</p>',parentId:null},
+{id:'school',name:'School Work',slug:'school-work',title:'School Work',heading:'School Work',body:'<p>Upload assignments, presentations and learning notes.</p>',parentId:null},
+{id:'gallery',name:'Creative Gallery',slug:'creative-gallery',title:'Creative Gallery',heading:'Creative Gallery',body:'<p>Share drawings, stories and other creations.</p>',parentId:null}
+]};
+function loadLocal(obj){site=JSON.parse(JSON.stringify(obj));selectedId=site.pages[0]?.id||null;$('siteTitle').value=site.settings.siteTitle;$('titleSuffix').value=site.settings.titleSuffix||'';$('headerPadding').value=site.settings.headerPadding||'125px';renderTree();if(selectedId)selectPage(selectedId);dirty=false}
+function settingsFromUI(){site.settings.siteTitle=$('siteTitle').value;site.settings.titleSuffix=$('titleSuffix').value;site.settings.headerPadding=$('headerPadding').value;dirty=true;updateSource();renderTree()}
+['siteTitle','titleSuffix','headerPadding'].forEach(id=>$(id).oninput=settingsFromUI);
+$('newPageBtn').onclick=()=>newPage(null);$('addRootBtn').onclick=()=>newPage(null);$('addChildBtn').onclick=()=>selectedId?newPage(selectedId):newPage(null);$('deletePageBtn').onclick=deletePage;$('savePageBtn').onclick=savePage;$('previewBtn').onclick=preview;
+document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.editor').forEach(x=>x.classList.remove('active'));t.classList.add('active');$(t.dataset.tab).classList.add('active');if(t.dataset.tab==='source')updateSource()});
+$('applySourceBtn').onclick=()=>{const p=site.pages.find(x=>x.id===selectedId);if(!p)return;const d=new DOMParser().parseFromString($('sourceHtml').value,'text/html');p.title=d.title||p.title;p.heading=d.querySelector('main h1')?.textContent||p.heading;p.body=d.querySelector('main')?.innerHTML.replace(/^<h1[\s\S]*?<\/h1>/,'').trim()||p.body;selectPage(p.id);dirty=true;setStatus('Source applied to current page locally.','ok')};
+$('sampleBtn').onclick=()=>{loadLocal(sample);setStatus('Example pages loaded locally. Publish when ready.','ok')};
+async function api(path,opts={}){const owner=$('owner').value.trim(),repo=$('repo').value.trim(),token=$('token').value.trim();if(!owner||!repo||!token)throw Error('Owner, repository and token are required.');const base=`https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}`;const res=await fetch(base+path,{...opts,headers:{Accept:'application/vnd.github+json','Content-Type':'application/json',Authorization:`Bearer ${token}`,'X-GitHub-Api-Version':'2022-11-28',...(opts.headers||{})}});const raw=await res.text();let data={};try{data=raw?JSON.parse(raw):{}}catch{}if(!res.ok)throw Error(data.message||`GitHub returned ${res.status}`);return data}
+function b64(s){const bytes=new TextEncoder().encode(s);let bin='';for(const b of bytes)bin+=String.fromCharCode(b);return btoa(bin)}
+function fromB64(s){const clean=(s||'').replace(/\n/g,'');const bytes=Uint8Array.from(atob(clean),c=>c.charCodeAt(0));return new TextDecoder().decode(bytes)}
+async function getFile(path,ref){try{return await api(`/contents/${path.split('/').map(encodeURIComponent).join('/')}?ref=${encodeURIComponent(ref||$('branch').value.trim()||'main')}`)}catch(e){if(/Not Found|404/i.test(e.message))return null;throw e}}
+async function getBranchHead(branch){const r=await api(`/git/ref/heads/${encodeURIComponent(branch)}`);return r.object.sha}
+async function publish(){
+ try{
+  if(!site.pages.length)throw Error('Create at least a Home page before publishing.');
+  if(!site.pages.some(p=>p.id==='home'&&p.slug==='home'))throw Error('The Home page must remain mapped to index.html.');
+  const branch=$('branch').value.trim()||'main';
+  setStatus('Checking GitHub repository and calculating changes...');
+  let headSha=null, headCommit=null, baseTree=null;
+  try{headSha=await getBranchHead(branch);headCommit=await api(`/git/commits/${headSha}`);baseTree=headCommit.tree.sha;}
+  catch(e){if(!/Not Found|404|Reference does not exist|Branch not found|empty/i.test(e.message))throw e;}
+  const oldManifestFile=headSha?await getFile('cms.json',branch):null;
+  let oldManifest=null;
+  if(oldManifestFile?.content){try{oldManifest=JSON.parse(fromB64(oldManifestFile.content))}catch{throw Error('Existing cms.json is not valid JSON. Fix it before publishing to avoid changing the wrong pages.')}}
+  const manifest=JSON.stringify(site,null,2)+'\n';
+  const desired=new Map();
+  for(const p of site.pages) desired.set(pagePath(p),generatePage(p));
+  desired.set('cms.json',manifest);
+  const oldManaged=new Set((oldManifest?.pages||[]).map(pagePath));
+  const newManaged=new Set(site.pages.map(pagePath));
+  const deletions=[...oldManaged].filter(path=>!newManaged.has(path));
+  const changes=[];
+  for(const [path,content] of desired){
+   const old=headSha?await getFile(path,branch):null;
+   const oldText=old?.content?fromB64(old.content):null;
+   if(oldText!==content)changes.push({path,content});
+  }
+  const entries=[];
+  for(const item of changes){
+   const blob=await api('/git/blobs',{method:'POST',body:JSON.stringify({content:item.content,encoding:'utf-8'})});
+   entries.push({path:item.path,mode:'100644',type:'blob',sha:blob.sha});
+  }
+  for(const path of deletions) entries.push({path,mode:'100644',type:'blob',sha:null});
+  if(!entries.length){dirty=false;setStatus('Everything is already up to date. No commit was created.','ok');return;}
+  setStatus(`Preparing one commit: ${changes.length} file(s) added/updated, ${deletions.length} managed page file(s) removed...`);
+  const treePayload={tree:entries};if(baseTree)treePayload.base_tree=baseTree;
+  const tree=await api('/git/trees',{method:'POST',body:JSON.stringify(treePayload)});
+  const names=[...changes.map(x=>x.path),...deletions.map(x=>`DELETE ${x}`)];
+  const commit=await api('/git/commits',{method:'POST',body:JSON.stringify({message:`Initialize/update MyLittleUniverse: ${names.length} file change(s)`,tree:tree.sha,parents:headSha?[headSha]:[]})});
+  if(headSha) await api(`/git/refs/heads/${encodeURIComponent(branch)}`,{method:'PATCH',body:JSON.stringify({sha:commit.sha,force:false})});
+  else await api('/git/refs',{method:'POST',body:JSON.stringify({ref:`refs/heads/${branch}`,sha:commit.sha})});
+  dirty=false;
+  setStatus(`${headSha?'Published successfully':'First website commit created'} in ONE commit.\nAdded/updated: ${changes.length}\nDeleted: ${deletions.length}\nFiles: ${names.join(', ')}\nYour GitHub Pages site can now be enabled with this branch and root folder. GitHub Pages may take a short time to build.`,'ok');
+ }catch(e){setStatus(e.message,'err')}
+}
+async function loadGithub(){
+ try{
+  setStatus('Checking repository for an existing CMS...');
+  let f=null;try{f=await getFile('cms.json')}catch(e){throw e}
+  if(!f){loadLocal(starter);setStatus('No cms.json found. Started a fresh MyLittleUniverse site with a Home page. Add pages and click Publish to create the website files in GitHub.','ok');return;}
+  const obj=JSON.parse(fromB64(f.content));loadLocal(obj);setStatus(`Loaded ${obj.pages.length} page(s) from cms.json.`,'ok');
+ }catch(e){setStatus(e.message,'err')}
+}
+$('loadBtn').onclick=loadGithub;$('publishBtn').onclick=publish;window.addEventListener('beforeunload',e=>{if(dirty){e.preventDefault();e.returnValue='';}});
+loadLocal(starter);
+</script></body></html>
