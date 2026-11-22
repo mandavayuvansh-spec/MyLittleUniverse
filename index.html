@@ -9,8 +9,233 @@
 @media(max-width:720px){.header-inner{min-height:70px;padding:11px 16px;gap:10px}.brand-mark{width:39px;height:39px;font-size:19px}.site-title{font-size:16px}.brand-caption{font-size:9px}.header-actions{gap:8px}.contact-button{display:none}.menu-toggle{display:grid;place-items:center;flex-shrink:0}.main-nav{display:none;position:absolute;top:100%;left:0;right:0;padding:12px 16px 17px;flex-direction:column;align-items:stretch;gap:4px;border-bottom:1px solid var(--border);background:#fff;box-shadow:0 14px 20px rgba(16,24,40,.06)}.main-nav.is-open{display:flex}.main-nav a{padding:11px 13px;font-size:14px}.body{display:flex;flex-direction:column;gap:16px;padding:16px 14px 30px}.sidebar{position:static;width:100%;padding:12px}.sidebar:not(:empty)::before{margin:0 8px 6px}.sidebar a{display:inline-flex;margin:3px;padding:8px 9px;font-size:12px}.content{width:100%;padding:28px 21px;border-radius:18px}.content h1{font-size:clamp(31px,8vw,42px);letter-spacing:-1.3px}.content p,.content li{font-size:16px}.content table{display:block;overflow-x:auto}.footer-inner{padding:22px 16px;align-items:flex-start;flex-direction:column}.footer-links{gap:15px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important}}
 </style></head><body><div class="site">
-<header class="site-header"><div class="header-inner"><a class="brand" href="index.html" aria-label="Home"><span class="brand-mark" aria-hidden="true">M</span><span><span class="site-title">MyLittleUniverse</span><span class="brand-caption">Ideas. Solutions. Growth.</span></span></a><div class="header-actions"><nav class="main-nav" id="mainNav" aria-label="Main navigation"><a href="index.html">Home</a></nav><a class="contact-button" href="index.html">Let's Talk ↗</a><button class="menu-toggle" id="menuToggle" type="button" aria-label="Open navigation menu" aria-controls="mainNav" aria-expanded="false"><span id="menuIcon" aria-hidden="true">☰</span></button></div></div></header>
-<div class="body no-sidebar"><aside class="sidebar" aria-label="Child pages"></aside><main class="content"><h1>Welcome to MyLittleUniverse</h1><p>A little universe for big ideas, school projects, creativity and learning.</p><section><h2>Explore</h2><p>Add your projects, experiments, artwork, certificates and learning notes using the CMS.</p></section></main></div>
-<footer class="site-footer"><div class="footer-inner"><div><div class="footer-brand">MyLittleUniverse</div><div class="footer-copy">© <span id="currentYear"></span> All rights reserved.</div></div><nav class="footer-links" aria-label="Footer navigation"><a href="index.html">Home</a></nav></div></footer>
+<header class="site-header"><div class="header-inner"><a class="brand" href="index.html" aria-label="Home"><span class="brand-mark" aria-hidden="true">M</span><span><span class="site-title">MyLittleUniverse</span><span class="brand-caption">Ideas. Solutions. Growth.</span></span></a><div class="header-actions"><nav class="main-nav" id="mainNav" aria-label="Main navigation"><a href="index.html">profile</a></nav><a class="contact-button" href="index.html">Let's Talk ↗</a><button class="menu-toggle" id="menuToggle" type="button" aria-label="Open navigation menu" aria-controls="mainNav" aria-expanded="false"><span id="menuIcon" aria-hidden="true">☰</span></button></div></div></header>
+<div class="body no-sidebar"><aside class="sidebar" aria-label="Child pages"></aside><main class="content"><h1>Welcome to MyLittleUniverse</h1>```html
+<div class="yuv-profile">
+
+<style>
+.yuv-profile{
+  --yp-blue:#4361ee;
+  --yp-purple:#845ec2;
+  --yp-orange:#ff9f43;
+  --yp-bg:#f5f7ff;
+  font-family:Arial,Helvetica,sans-serif;
+  color:#25304a;
+  line-height:1.7;
+}
+.yuv-profile *{box-sizing:border-box}
+.yuv-hero{
+  background:linear-gradient(135deg,#4361ee,#845ec2);
+  color:white;
+  padding:55px 25px;
+  border-radius:22px;
+  text-align:center;
+  position:relative;
+  overflow:hidden;
+}
+.yuv-hero h1{font-size:38px;margin:10px 0}
+.yuv-hero p{font-size:17px;max-width:650px;margin:10px auto}
+.yuv-avatar{
+  width:110px;height:110px;border-radius:50%;
+  background:#fff;color:#6548c7;
+  display:flex;align-items:center;justify-content:center;
+  font-size:55px;margin:0 auto 15px;
+  border:5px solid #ffffff80;
+}
+.yuv-tag{
+  display:inline-block;background:#ffffff25;
+  padding:7px 16px;border-radius:30px;margin:5px;
+  font-size:13px;
+}
+.yuv-section{padding:35px 5px}
+.yuv-section h2{font-size:26px;margin-bottom:10px;color:#3949ab}
+.yuv-intro{
+  background:#fff;border-radius:16px;padding:24px;
+  box-shadow:0 5px 20px #26345b10;
+}
+.yuv-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));
+  gap:17px;margin-top:20px;
+}
+.yuv-card{
+  background:#fff;border-radius:17px;padding:22px;
+  border:1px solid #e9eaff;
+  box-shadow:0 5px 18px #26345b0c;
+  transition:transform .2s;
+}
+.yuv-card:hover{transform:translateY(-5px)}
+.yuv-icon{font-size:37px}
+.yuv-card h3{margin:8px 0;color:#3949ab;font-size:19px}
+.yuv-card p{font-size:14px;margin:0}
+.yuv-quote{
+  background:linear-gradient(120deg,#fff1dc,#ffe5f1);
+  border-radius:18px;padding:27px;text-align:center;
+  font-size:20px;font-weight:bold;color:#70429b;
+}
+.yuv-goals{
+  background:#eef1ff;border-radius:18px;padding:25px;
+}
+.yuv-goals li{margin:9px 0}
+.yuv-footer{
+  text-align:center;padding:25px;color:#68718a;
+  border-top:1px solid #e7e9f3;font-size:13px;
+}
+@media(max-width:600px){
+ .yuv-hero{padding:38px 18px}
+ .yuv-hero h1{font-size:30px}
+ .yuv-section{padding:25px 2px}
+}
+</style>
+
+<!-- HERO -->
+<section class="yuv-hero">
+  <div class="yuv-avatar">🚀</div>
+  <span class="yuv-tag">MY LITTLE UNIVERSE</span>
+  <h1>Hello, I'm Yuvansh! 👋</h1>
+  <p>
+    Welcome to my creative world! I love exploring new ideas,
+    making games, creating videos, drawing, painting and discovering AI.
+  </p>
+  <span class="yuv-tag">🎓 Grade 4 Student</span>
+  <span class="yuv-tag">🎮 Young Game Creator</span>
+  <span class="yuv-tag">🎨 Creative Explorer</span>
+</section>
+
+<!-- ABOUT ME -->
+<section class="yuv-section">
+  <h2>🌟 About Me</h2>
+  <div class="yuv-intro">
+    <p>
+      Hi! I'm <strong>Yuvansh</strong>, a Grade 4 student who loves
+      learning, creating and experimenting with new things.
+    </p>
+    <p>
+      I enjoy turning my imagination into something real. Sometimes
+      it's a game, sometimes a video, and sometimes a beautiful
+      drawing or painting.
+    </p>
+    <p>
+      I am also curious about Artificial Intelligence and how
+      technology can help people create amazing things.
+    </p>
+    <p>
+      This website is my little universe where I can share my ideas,
+      projects, creativity and learning journey.
+    </p>
+  </div>
+</section>
+
+<!-- MY INTERESTS -->
+<section class="yuv-section">
+  <h2>🚀 Things I Love</h2>
+  <p>These are some of my favourite creative activities.</p>
+
+  <div class="yuv-grid">
+
+    <div class="yuv-card">
+      <div class="yuv-icon">🎮</div>
+      <h3>Game Development</h3>
+      <p>
+        I love imagining and making games. I enjoy creating characters,
+        levels, challenges and exciting adventures.
+      </p>
+    </div>
+
+    <div class="yuv-card">
+      <div class="yuv-icon">🎬</div>
+      <h3>Video Creation</h3>
+      <p>
+        I enjoy creating videos, exploring storytelling, adding
+        creative ideas and bringing my imagination to life.
+      </p>
+    </div>
+
+    <div class="yuv-card">
+      <div class="yuv-icon">🎨</div>
+      <h3>Arts & Drawing</h3>
+      <p>
+        Drawing lets me express my thoughts and imagination.
+        I love experimenting with shapes, colours and designs.
+      </p>
+    </div>
+
+    <div class="yuv-card">
+      <div class="yuv-icon">🖌️</div>
+      <h3>Painting</h3>
+      <p>
+        I love mixing colours and creating colourful pictures.
+        Every painting gives me a chance to try something new.
+      </p>
+    </div>
+
+    <div class="yuv-card">
+      <div class="yuv-icon">🤖</div>
+      <h3>Artificial Intelligence</h3>
+      <p>
+        I am curious about AI and how smart technology works.
+        I enjoy discovering how AI can help with ideas, learning and creativity.
+      </p>
+    </div>
+
+    <div class="yuv-card">
+      <div class="yuv-icon">💡</div>
+      <h3>Inventing Ideas</h3>
+      <p>
+        I like asking questions, solving problems and thinking
+        about new things I could build or create.
+      </p>
+    </div>
+
+  </div>
+</section>
+
+<!-- MY CREATIVE MINDSET -->
+<section class="yuv-section">
+  <div class="yuv-quote">
+    "I imagine it. I create it. I learn from it. I make it better!" 🌈
+  </div>
+</section>
+
+<!-- MY DREAMS -->
+<section class="yuv-section">
+  <h2>🎯 My Dreams & Goals</h2>
+  <div class="yuv-goals">
+    <ul>
+      <li>🎮 Create my own fun and exciting video games.</li>
+      <li>🎥 Make interesting and creative videos.</li>
+      <li>🎨 Improve my drawing, painting and artistic skills.</li>
+      <li>🤖 Learn more about Artificial Intelligence.</li>
+      <li>💻 Discover how computers and technology work.</li>
+      <li>🌍 Share my creations and inspire other young creators.</li>
+      <li>📚 Keep learning something new every day.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- MY LEARNING PHILOSOPHY -->
+<section class="yuv-section">
+  <h2>🧠 My Learning Philosophy</h2>
+  <div class="yuv-intro">
+    <p>
+      I believe learning should be fun, creative and full of discoveries.
+      I don't have to know everything today. I just need to keep trying.
+    </p>
+    <p>
+      Every mistake teaches me something. Every new idea is a chance
+      to create something amazing!
+    </p>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<div class="yuv-footer">
+  <h3>✨ Thanks for Visiting My Little Universe! ✨</h3>
+  <p>Keep dreaming • Keep creating • Keep exploring</p>
+  <p>Made with ❤️ and imagination by Yuvansh</p>
+</div>
+
+</div>
+```</main></div>
+<footer class="site-footer"><div class="footer-inner"><div><div class="footer-brand">MyLittleUniverse</div><div class="footer-copy">© <span id="currentYear"></span> All rights reserved.</div></div><nav class="footer-links" aria-label="Footer navigation"><a href="index.html">profile</a></nav></div></footer>
 </div><script>(function(){const toggle=document.getElementById('menuToggle');const nav=document.getElementById('mainNav');const icon=document.getElementById('menuIcon');function setOpen(open){nav.classList.toggle('is-open',open);toggle.setAttribute('aria-expanded',String(open));toggle.setAttribute('aria-label',open?'Close navigation menu':'Open navigation menu');icon.textContent=open?'×':'☰'}toggle.addEventListener('click',()=>setOpen(toggle.getAttribute('aria-expanded')!=='true'));nav.addEventListener('click',e=>{if(e.target.closest('a'))setOpen(false)});document.addEventListener('keydown',e=>{if(e.key==='Escape'){setOpen(false)}});window.addEventListener('resize',()=>{if(window.innerWidth>720)setOpen(false)});const path=location.pathname.replace(/\/+$/,'');nav.querySelectorAll('a').forEach(a=>{try{if(new URL(a.href,location.href).pathname.replace(/\/+$/,'')===path)a.setAttribute('aria-current','page')}catch(e){}});document.getElementById('currentYear').textContent=new Date().getFullYear()})();</script>
 </body></html>
